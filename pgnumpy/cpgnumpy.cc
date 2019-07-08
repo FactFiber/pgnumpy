@@ -811,8 +811,8 @@ void cPgNumpy::_make_descr()
         if (debug) {
             cout<<"  Format = "<<nptype<<endl;
 		}
-        PyObject* ttype = PyString_FromString(nptype.c_str());
-        PyObject* tname = PyString_FromString(fname.c_str());
+        PyObject* ttype = PyBytes_FromString(nptype.c_str());
+        PyObject* tname = PyBytes_FromString(fname.c_str());
 
         // Don't have to decref objects put into sequence.  They will get
         // decrefed when the sequence is decrefed
