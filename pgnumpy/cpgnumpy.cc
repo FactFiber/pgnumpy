@@ -20,7 +20,8 @@ onintr(int sig)
 //Constructor and destructor
 cPgNumpy::cPgNumpy() throw (const char*)
 {
-    import_array(); // Must be present for numpy.
+    // import_array(); // Must be present for numpy.
+    import_array1();
     _set_defaults();
     _print_debug("Opening with no explicit connect info");
     open();
@@ -29,7 +30,7 @@ cPgNumpy::cPgNumpy() throw (const char*)
 //Constructor and destructor
 cPgNumpy::cPgNumpy(string conninfo) throw (const char*)
 {
-    import_array(); // Must be present for numpy.
+    import_array1(); // Must be present for numpy.
     _set_defaults();
     _print_debug("Opening with no explicit connect info");
     open(conninfo.c_str());
@@ -39,7 +40,7 @@ cPgNumpy::cPgNumpy(string conninfo) throw (const char*)
 //Constructor and destructor
 cPgNumpy::cPgNumpy(const char* conninfo) throw (const char*)
 {
-    import_array(); // Must be present for numpy.
+    import_array1(); // Must be present for numpy.
     _set_defaults();
     _print_debug("Opening with no explicit connect info");
     open(conninfo);
@@ -213,7 +214,7 @@ long long cPgNumpy::write(const char* filename) throw (const char*) {
                     }
                 }
             } else {
-                fprintf(OFILEPTR,"%s",value); 
+                fprintf(OFILEPTR,"%s",value);
             }
 
             /* If last field print a new line, else a tab*/
@@ -400,7 +401,7 @@ long long cPgNumpy::execwrite(const char* query, const char* filename) throw (co
                             }
                         }
                     } else {
-                        fprintf(OFILEPTR,"%s",value); 
+                        fprintf(OFILEPTR,"%s",value);
                     }
 
                     /* If last field print a new line, else a tab*/
@@ -444,7 +445,7 @@ void cPgNumpy::_check_status() throw (const char*) {
     //   returns results or not.  If it does not return data, but
     //   successfully completed, then the status will be set to
     //   PGRES_COMMAND_OK.  If success and returns tuples, then it will be
-    //   set to PGRES_TUPLES_OK 
+    //   set to PGRES_TUPLES_OK
 
     mResultStatus = PQresultStatus(mResult);
     mNtuples = (npy_intp) PQntuples(mResult);
@@ -456,14 +457,14 @@ void cPgNumpy::_check_status() throw (const char*) {
     }
     // in this case no results: print what happened
     if (PGRES_COMMAND_OK == mResultStatus) {
-        _print_debug("result status is PGRES_COMMAND_OK"); 
+        _print_debug("result status is PGRES_COMMAND_OK");
         // Success but no results
         cout<<PQcmdStatus(mResult)<<"\n";
         return;
     }
     // in 8.4 empty queries will return this instead of PGRES_COMMAND_OK
     if (PGRES_EMPTY_QUERY == mResultStatus) {
-        _print_debug("result status is PGRES_EMPTY_QUERY"); 
+        _print_debug("result status is PGRES_EMPTY_QUERY");
         // Success but no results
         cout<<PQcmdStatus(mResult)<<"\n";
         return;
@@ -471,27 +472,27 @@ void cPgNumpy::_check_status() throw (const char*) {
     if (PGRES_TUPLES_OK != mResultStatus) {
         switch (mResultStatus) {
             // No results
-            case PGRES_COPY_IN: 
-                _print_debug("result status is PGRES_COPY_IN"); 
+            case PGRES_COPY_IN:
+                _print_debug("result status is PGRES_COPY_IN");
             return;
-            case PGRES_COPY_OUT: 
-                _print_debug("result status is PGRES_COPY_OUT"); 
+            case PGRES_COPY_OUT:
+                _print_debug("result status is PGRES_COPY_OUT");
                 return;
             case PGRES_BAD_RESPONSE:
                 // might be OK?
-                _print_debug("result status is PGRES_BAD_RESPONSE"); 
+                _print_debug("result status is PGRES_BAD_RESPONSE");
                 _print_debug(PQresultErrorMessage(mResult));
                 break;
-            case PGRES_NONFATAL_ERROR: 
+            case PGRES_NONFATAL_ERROR:
                 // this is OK, just print it
-                _print_debug("result status is PGRES_NONFATAL_ERROR"); 
+                _print_debug("result status is PGRES_NONFATAL_ERROR");
                 _print_debug(PQresultErrorMessage(mResult));
                 break;
-            case PGRES_FATAL_ERROR:    
-                _print_debug("result status is PGRES_FATAL_ERROR"); 
+            case PGRES_FATAL_ERROR:
+                _print_debug("result status is PGRES_FATAL_ERROR");
                 throw PQresultErrorMessage(mResult);
             default: break;
-        } 
+        }
     }
 
     // Result is empty, either an error or this query returns no data
@@ -582,8 +583,8 @@ void cPgNumpy::_fill_array(PyObject* ret) {
                     PQgetvalue(mResult, row, field),
                     flen,
                     data,
-                    mFieldInfo.nbytes[field], 
-                    mFieldInfo.isarray[field], 
+                    mFieldInfo.nbytes[field],
+                    mFieldInfo.isarray[field],
                     mFieldInfo.isstring[field]);
 
             data += mFieldInfo.nbytes[field]*mFieldInfo.nel[field];
@@ -594,7 +595,7 @@ void cPgNumpy::_fill_array(PyObject* ret) {
 
 
 void cPgNumpy::_store_field(
-        char* input,    // Input postgresql data 
+        char* input,    // Input postgresql data
         int flen,       // length of this field in the input data
         char* output,   // Output array data
         int nbytes,     // number of available bytes in the output array
@@ -608,13 +609,13 @@ void cPgNumpy::_store_field(
 	}
 }
 
-// Fill a scalar with the appropriate number of bytes.  Swap bytes if 
+// Fill a scalar with the appropriate number of bytes.  Swap bytes if
 // necessary
 void cPgNumpy::_fill_scalar(
-        char* input,     // Input postgresql data 
-        int32_t flen,  // Lenght of this field in the input data 
+        char* input,     // Input postgresql data
+        int32_t flen,  // Lenght of this field in the input data
         char* output,    // Output array data
-        int nbytes,      // number of bytes available in the output data 
+        int nbytes,      // number of bytes available in the output data
         int isstring)    // Is this a string?
 {
     // copy the smallest of the two
@@ -644,12 +645,12 @@ void cPgNumpy::_fill_scalar(
 
 
 void cPgNumpy::_fill_array(
-        char* input,    // Input postgresql data 
+        char* input,    // Input postgresql data
         char* output,   // Output array data
         int nbytes,     // Number of bytes available in output data field
         int isstring)   // Is this a string?
 {
-    
+
     // This is the most generic possible version of this program.  We can
     // probably speed it up later
 
@@ -672,7 +673,7 @@ void cPgNumpy::_fill_array(
 
     if (debug2) cout<<"        Nel = "<<n_elements<<endl;
 
-    
+
     int32_t flen=0;
     for (int32_t i=0; i< n_elements; i++) {
 
@@ -689,7 +690,7 @@ void cPgNumpy::_fill_array(
 
         // Skip to the next element
         input += flen;
-        output += nbytes; 
+        output += nbytes;
     }
 
 }
@@ -701,7 +702,7 @@ void cPgNumpy::_tohost(char* data, int nbytes)
     if (IS_BIG_ENDIAN) {
         return;
     }
-    switch(nbytes) 
+    switch(nbytes)
 	{
         case 2:
             {
@@ -742,7 +743,7 @@ void cPgNumpy::_make_descr()
 
     // Make a list of tuples.  This is temporary, we will decref it
     PyObject* dlist=PyList_New(0);
-    
+
 
     mFieldInfo.nbytes.assign(mNfields,0);
     mFieldInfo.isarray.assign(mNfields,0);
@@ -780,8 +781,8 @@ void cPgNumpy::_make_descr()
         int32_t max_flen=0;
         if (isarray) {
             PyObject* dims = _get_array_field_shape(
-                    i, 
-                    mFieldInfo.nel[i], 
+                    i,
+                    mFieldInfo.nel[i],
                     max_flen);
             _print_debug("  Setting dims in descr tuple");
             PyTuple_SetItem(dtup, 2, dims);
@@ -793,7 +794,7 @@ void cPgNumpy::_make_descr()
         // We have a few options here.  There is the size of the actual
         // field, that is what we get from PQgetlength().  This is perfectly
         // good for character(n) fixed length fields.  For varchar(n) we
-        // should try to find the max length.  
+        // should try to find the max length.
         if (nbytes == -1) {
             nbytes = _pg_string_nbytes(fname, i, ftype, isarray, max_flen);
         }
@@ -822,7 +823,7 @@ void cPgNumpy::_make_descr()
 
         // Same goes for this tuple: no decref needed
         PyList_Append(dlist, dtup);
-        
+
     }
 
     _print_debug("Calling PyArray_DescrConverter");
@@ -840,9 +841,9 @@ void cPgNumpy::_make_descr()
 // Return a string containing the type of the field, the number of bytes
 // if known, and if this is an array
 void cPgNumpy::_pg_type_info(
-        int pgtype, 
-        string &nptype, 
-        int& nbytes, 
+        int pgtype,
+        string &nptype,
+        int& nbytes,
         int& isarray)
 {
     switch (pgtype) {
@@ -884,7 +885,7 @@ void cPgNumpy::_pg_type_info(
                    nbytes=1;
                    isarray=1;
                    break;
-        case 1005: nptype="i2"; 
+        case 1005: nptype="i2";
                    nbytes=2;
                    isarray=1;
                    break;
@@ -917,7 +918,7 @@ void cPgNumpy::_pg_type_info(
                    isarray=1;
                    break;
 
-        default: 
+        default:
                    if (debug) {
                        stringstream out;
                        out<<"Fell through type case with: "<<pgtype<<"\n";
@@ -934,13 +935,13 @@ void cPgNumpy::_pg_type_info(
 // Return the shape of the array and the maximum length of the fields
 // in the first row
 PyObject* cPgNumpy::_get_array_field_shape(
-        int fieldnum, 
+        int fieldnum,
         npy_intp& totlen,
         int32_t& max_flen)
 {
 
     PyObject* dims=NULL;
-    char* mptr = PQgetvalue(mResult, 0, fieldnum); 
+    char* mptr = PQgetvalue(mResult, 0, fieldnum);
 
     // 32-bit integer, 4-bytes
     int32_t ndim = _tohost( *(int32_t *) mptr );
@@ -982,10 +983,10 @@ PyObject* cPgNumpy::_get_array_field_shape(
 // This is for those cases where we can't just get it from the type
 // definition
 int32_t cPgNumpy::_pg_string_nbytes(
-        string& fname, 
+        string& fname,
         int fnum,          // field number
         int ftype,         // postgres field type number
-        int isarray, 
+        int isarray,
         int32_t max_flen)  // max_flen is the longest of the first row for arrays, zero otherwise
 {
     int32_t nbytes=0;
@@ -1009,10 +1010,10 @@ int32_t cPgNumpy::_pg_string_nbytes(
 
         int fmod = PQfmod(mResult, fnum) - 4; // minus 4 for lenght field?
 
-        if (debug) { 
+        if (debug) {
 			cout<<"    Got flen="<<flen<<" for character field"<<endl;
 		}
-        if (debug) { 
+        if (debug) {
 			cout<<"    Got fmod="<<fmod<<" for character field"<<endl;
 		}
         if (ftype == 1042 || ftype == 1014 ) {
@@ -1145,4 +1146,3 @@ void cPgNumpy::_set_defaults() {
 
     mDescr=NULL;
 }
-
